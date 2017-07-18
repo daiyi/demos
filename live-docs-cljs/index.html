@@ -8,18 +8,18 @@
       height: 100%;
       margin: 0;
       padding: 0;
+      font-family: monospace;
     }
     .CodeMirror.cm-s-default {
-      /*max-height: 50%;*/
       border: none;
-      background: #ddd;
+      background: #e6e4eb;
     }
     .CodeMirror-scroll {
       padding: 10px;
     }
     .CodeMirror.cm-s-default + .CodeMirror.cm-s-default {
+      /* todo show debugging in a sensible way */
       display: none;
-      /*background: #27e10e*/
     }
     .wrapper {
       height: 100%;
@@ -33,18 +33,88 @@
       height: 100%;
       /*padding: 10px;*/
     }
+    .left {
+      background: #e6e4eb;
+      border: 10px solid #fff;
+      box-sizing: border-box;
+
+      height: 100%;
+      display: flex;
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .nav {
+      flex: 0 1 auto;
+      width: 100%;
+      background: #fff;
+    }
+
+    #box-editor {
+      height: 100%;
+      flex: 1;
+      width: 100%;
+      overflow: auto;
+    }
+
+    .editor-panel {
+      flex: 1;
+      overflow: auto;
+    }
+
+    .app h1 {
+      font-family: monospace;
+    }
+
+    .nav ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      margin-bottom: 10px;
+    }
+    .nav li {
+      color: #888888;
+      display: inline-block;
+      margin:  5px;
+    }
+    .nav li a {
+      border: none;
+      transition: color 0.8s ease;
+      color: #6f95e2;
+    }
+    .nav li a:hover {
+      color: #7bc14d;
+    }
+    pre#editor {
+      display: none;
+    }
   </style>
 </head>
 
 <body>
-
-
   <div class="wrapper">
-    <div class="box">
-      <pre class="editor">
+    <div class="box left">
+      <div class="nav">
+        <ul>
+          <li>
+            <a href="/">
+              re-frame playground
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/Day8/re-frame/blob/master/README.md">
+              docs
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="editor-panel">
+        <div id="box-editor">
+          <pre id="editor">
 (ns simple.core
-  (:require [reagent.core :as reagent]
-            [re-frame.core :as rf]))
+(:require [reagent.core :as reagent]
+          [re-frame.core :as rf]
+          [clojure.string :as str]))
 
 ;; A detailed walk-through of this source code is provied in the docs:
 ;; https://github.com/Day8/re-frame/blob/master/docs/CodeWalkthrough.md
@@ -57,7 +127,7 @@
     (rf/dispatch [:timer now])))  ;; <-- dispatch used
 
 ;; Call the dispatching function every second.
-;; `defonce` is like `def` but it ensures only instance is ever
+;; `defonce` is like `def` but it ensures only one instance is ever
 ;; created in the face of figwheel hot-reloading of this file.
 (defonce do-timer (js/setInterval dispatch-timer-event 1000))
 
@@ -88,8 +158,7 @@
 (rf/reg-sub
   :time
   (fn [db _]     ;; db is current app state. 2nd unused param is query vector
-    (-> db
-        :time)))
+    (:time db))) ;; return a query computation over the application state
 
 (rf/reg-sub
   :time-color
@@ -102,10 +171,10 @@
 (defn clock
   []
   [:div.example-clock
-   {:style {:color @(rf/subscribe [:time-color])}}
+   {:style {:margin-bottom 10 :font-size 25 :color @(rf/subscribe [:time-color])}}
    (-> @(rf/subscribe [:time])
        .toTimeString
-       (clojure.string/split " ")
+       (str/split " ")
        first)])
 
 (defn color-input
@@ -119,41 +188,74 @@
 (defn ui
   []
   [:div
-   [:h1 "Hello world, it is now"]
+   [:h1 "re-frame playground"]
    [clock]
-   [color-input]])
+   [color-input]
+
+   [:h2 "try some other examples!"]
+   [:ul
+    [:li
+     [:a {:href "?gist-id=sklind/1398f41345ea4df551b0c370ac1ac822"} "hello world clock"]]
+    [:li
+     [:a {:href "/"} "refresh"]]]])
 
 ;; -- Entry Point -------------------------------------------------------------
 
 (defn ^:export run
   []
   (rf/dispatch-sync [:initialize])     ;; puts a value into application state
-  (reagent/render [ui]              ;; mount the application's ui into '<div id="app" />'
+  (reagent/render [ui]                 ;; mount the application ui
                   (js/document.getElementById "app")))
 
-
+;; this runs the entire application and puts it into the panel to the right!
 (run)
-      </pre>
-      <!-- <pre class="editor">
-        (ns second.core)
-        (+ 1 5)
-      </pre> -->
+          </pre>
+        </div>
+      </div>
     </div>
     <div class="box">
-      <div id="app" style="margin-bottom: 30px"></div>
-    </div>
+        <div id="app">
+            <h1>re-frame playground</h1>
+            loading...
+        </div>
+      </div>
   </div>
 
+  <script>
+    function getParameterByName(name, url) {
+      if (!url) url = window.location.href;
+      name = name.replace(/[\[\]]/g, "\\$&");
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+          results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
+    function loadCode()  {
+      var gistId = getParameterByName('gist-id', window.location.href)
+      var klipse = document.createElement('script')
+      klipse.setAttribute('src', 'https://storage.googleapis.com/app.klipse.tech/plugin/js/klipse_plugin.js')
+
+      if (gistId) {
+        var editor = document.getElementById('editor')
+        editor.setAttribute('data-gist-id', gistId)
+      }
+
+      document.body.appendChild(klipse)
+    };
+
+    loadCode();
+  </script>
 
   <script>
-      window.klipse_settings = {
-          selector: '.editor', // css selector for the html elements you want to klipsify
-          // eval_idle_msec: 2000,
-          codemirror_options_in: {
-              lineWrapping: true,
-              autoCloseBrackets: true
-          }
-      };
+     window.klipse_settings = {
+       selector: '#editor', // css selector for the html elements you want to klipsify
+       eval_idle_msec: 300,
+       codemirror_options_in: {
+           lineWrapping: true,
+           autoCloseBrackets: true
+       }
+     };
   </script>
-  <script src="https://storage.googleapis.com/app.klipse.tech/plugin/js/klipse_plugin.js"></script>
 </body>
