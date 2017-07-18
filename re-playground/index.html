@@ -108,17 +108,27 @@
     [:li
      [:a {:href "?gist-id=sklind/1398f41345ea4df551b0c370ac1ac822"} "hello world clock"]]
     [:li
-     [:a {:href "/"} "refresh"]]]])
+     [:a {:href "/"} "another example tbd"]]]
+
+   [:h2 "loading samples"]
+    [:p "you can load gists with this url param: " [:code "gist-id=[github-username]/[gist-id]"]]
+    [:p "for example, "
+     [:a {:href "?gist-id=mhuebert/562e88d75c04178f1c18ddacc7cff2b7"} "?gist-id=mhuebert/562e88d75c04178f1c18ddacc7cff2b7"]]
+   ])
 
 ;; -- Entry Point -------------------------------------------------------------
 
 (defn ^:export run
   []
   (rf/dispatch-sync [:initialize])     ;; puts a value into application state
-  (reagent/render [ui]                 ;; mount the application ui
+  (reagent/render [ui]                 ;; mount the application ui into the element with id "app"
                   (js/document.getElementById "app")))
 
-;; this runs the entire application and puts it into the panel to the right!
+;; -- APPLICATION ENDS --------------------------------------------------------
+
+
+
+;; this tells klipse to run the entire application and puts it into the panel to the right!
 (run)
           </pre>
         </div>
@@ -127,7 +137,8 @@
     <div class="panel">
         <div id="app">
             <h1>re-frame playground</h1>
-            loading...
+            <p>loading...</p>
+            <p>(did you remember to <code>(run)</code> your application?)</p>
         </div>
       </div>
   </div>
@@ -160,7 +171,7 @@
       klipse.setAttribute('src', 'https://storage.googleapis.com/app.klipse.tech/plugin/js/klipse_plugin.js')
 
       if (gistId) {
-        var editor = document.getElementById('editor')
+        var editor = document.getElementById('editor-contents')
         editor.setAttribute('data-gist-id', gistId)
       }
 

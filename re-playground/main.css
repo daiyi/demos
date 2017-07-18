@@ -79,3 +79,8 @@ body, html {
 pre#editor-contents {
   display: none;
 }
+
+code {
+  background: #eee;
+  color: #3b197f;
+}
