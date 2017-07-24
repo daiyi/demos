@@ -83,3 +83,7 @@ code {
   background: #eee;
   color: #3b197f;
 }
+
+.hidden {
+  display: none;
+}
