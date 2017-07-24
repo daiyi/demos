@@ -82,3 +82,7 @@ div.CodeMirror span.CodeMirror-matchingbracket {
 	background-color: #412a53;
 	border-radius: 3px;
 }
+
+.CodeMirror-wrap pre {
+  word-break: break-word;
+}
